@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практические работы по Python + Groq API | Проектирование ИИ-решений</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        header {
+            background: #1e466e;
+            color: white;
+            padding: 1.8rem 2rem;
+            border-bottom: 4px solid #ffb347;
+        }
+        header h1 {
+            font-size: 1.9rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+        header p {
+            margin-top: 0.5rem;
+            opacity: 0.85;
+            font-size: 1rem;
+        }
+        .discipline-badge {
+            display: inline-block;
+            background: #ffb347;
+            color: #1e2a3e;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+        }
+        nav {
+            background: #f8fafc;
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+        nav a {
+            color: #1e466e;
+            text-decoration: none;
+            margin-right: 1.5rem;
+            font-weight: 500;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            padding: 2rem;
+        }
+        h2 {
+            font-size: 1.6rem;
+            margin-top: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            color: #0f2b3f;
+        }
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+            color: #1e466e;
+        }
+        h4 {
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+            font-weight: 600;
+        }
+        p, li {
+            margin-bottom: 0.75rem;
+        }
+        .code-block {
+            background: #f1f5f9;
+            border-left: 4px solid #ffb347;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        code {
+            background: #eef2f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+        .file-path {
+            background: #eef2f6;
+            font-family: monospace;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+            font-size: 0.8rem;
+            margin: 0.5rem 0;
+        }
+        .note {
+            background: #fef9e3;
+            border-left: 4px solid #ffb347;
+            padding: 0.75rem 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+        }
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .task-card {
+            background: #f9fbfd;
+            border: 1px solid #e2edf2;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            transition: box-shadow 0.1s ease;
+        }
+        .task-card h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .step-hint {
+            background: #f0f4f8;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        footer {
+            background: #f1f5f9;
+            padding: 1.2rem 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #4a627a;
+            border-top: 1px solid #e2e8f0;
+        }
+        @media (max-width: 700px) {
+            main {
+                padding: 1.2rem;
+            }
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Практические работы по Python + Groq API</h1>
+        <p>Интеграция языковых моделей в приложения на Python</p>
+        <div class="discipline-badge">Проектирование ИИ-решений на Python | День 8–10</div>
+    </header>
+    <nav>
+        <a href="#work1">Работа №1</a>
+        <a href="#work2">Работа №2</a>
+        <a href="#work3">Работа №3</a>
+        <a href="#work4">Работа №4</a>
+        <a href="#resources">Ресурсы</a>
+    </nav>
+    <main>
+        <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3 и другим моделям), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python. Все задания выполняются в среде PyCharm или VS Code.</p>
+        <div class="note">
+            🔑 <strong>Подготовка:</strong> зарегистрируйтесь на <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key. Скопируйте ключ (начинается с <code>gsk_</code>). Установите библиотеки: <code>pip install requests python-dotenv</code>.
+        </div>
+
+        <!-- ====================== РАБОТА №1 ====================== -->
+        <h2 id="work1">📘 Практическая работа №1. Консольный AI-помощник</h2>
+        <p><strong>Цель:</strong> научиться отправлять запросы к Groq API, использовать системные промпты и обрабатывать ответы.</p>
+        <h3>📁 Структура проекта</h3>
+        <div class="code-block">
+            <pre>ai_python/
+├── .env                (хранит API-ключ)
+├── assistant.py        (основной скрипт)
+└── requirements.txt</pre>
+        </div>
+        <h3>1. Настройка окружения</h3>
+        <div class="file-path">.env</div>
+        <div class="code-block"><pre>GROQ_API_KEY=gsk_.......</pre></div>
+        <div class="file-path">assistant.py (первая версия — просто запрос)</div>
+        <div class="code-block"><pre>import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv("GROQ_API_KEY")
+URL = "https://api.groq.com/openai/v1/chat/completions"
+
+def ask_groq(prompt, system_prompt=None):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
+
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": messages,
+        "temperature": 0.7,
+        "max_tokens": 200
+    }
+    response = requests.post(URL, json=payload, headers=headers)
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
+
+if __name__ == "__main__":
+    print("🤖 AI помощник (напиши 'выход' для завершения)")
+    system = "Ты дружелюбный эксперт по программированию на Python. Отвечай кратко и понятно."
+    while True:
+        user_input = input("\n🧑‍💻 Вы: ")
+        if user_input.lower() in ("выход", "exit"):
+            break
+        answer = ask_groq(user_input, system)
+        print(f"🤖 AI: {answer}")</pre></div>
+        <div class="note">
+            💡 <strong>Пояснение:</strong> Мы используем библиотеку <code>requests</code> для POST-запроса. <code>load_dotenv</code> загружает ключ из файла <code>.env</code> — это безопаснее, чем хранить ключ в коде.
+        </div>
+        <h3>2. Задание для самостоятельного выполнения</h3>
+        <ul>
+            <li>Добавьте команду <code>/history</code>, которая показывает последние 5 обменов сообщениями (храните историю в списке).</li>
+            <li>Реализуйте ограничение длины контекста (например, последние 10 сообщений).</li>
+            <li>Изменяйте температуру через переменную в коде и наблюдайте за креативностью ответов.</li>
+        </ul>
+
+        <!-- ====================== РАБОТА №2 ====================== -->
+        <h2 id="work2">🌤️ Практическая работа №2. AI с реальными данными о погоде</h2>
+        <p><strong>Цель:</strong> объединить вызов внешнего API погоды (Open-Meteo) с Groq — AI будет отвечать на вопросы, используя реальные данные.</p>
+        <h3>Как это работает</h3>
+        <ol>
+            <li>Пользователь спрашивает: <em>«Какая погода в Минске?»</em></li>
+            <li>Программа распознаёт ключевые слова и вызывает функцию <code>get_weather(city)</code>.</li>
+            <li>Полученную погоду передаём в Groq, чтобы AI сформулировал красивый ответ.</li>
+        </ol>
+        <div class="code-block"><pre>import os, requests
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv("GROQ_API_KEY")
+
+def get_weather(city):
+    # Получаем координаты
+    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&language=ru&format=json"
+    geo_resp = requests.get(geo_url).json()
+    if not geo_resp.get("results"):
+        return None
+    lat = geo_resp["results"][0]["latitude"]
+    lon = geo_resp["results"][0]["longitude"]
+    # Получаем погоду
+    weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+    weather_data = requests.get(weather_url).json()
+    temp = weather_data["current_weather"]["temperature"]
+    wind = weather_data["current_weather"]["windspeed"]
+    return f"Сейчас {temp}°C, ветер {wind} км/ч"
+
+def ask_groq_with_weather(user_question):
+    # Проверяем, не спрашивает ли пользователь о погоде
+    if "погод" in user_question.lower():
+        # Простейшее извлечение города (можно улучшить через регулярное выражение)
+        words = user_question.split()
+        city = None
+        for w in words:
+            if w.lower() in ("минск", "москва", "кий", "питер", "брест", "гродно"):
+                city = w
+                break
+        if city:
+            weather = get_weather(city)
+            if weather:
+                prompt = f"Пользователь спросил: '{user_question}'. Реальная погода в {city}: {weather}. Ответь дружелюбно, включив эти данные."
+            else:
+                prompt = f"Пользователь спросил о погоде, но город '{city}' не найден. Сообщи об этом вежливо."
+        else:
+            prompt = user_question
+    else:
+        prompt = user_question
+
+    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7
+    }
+    resp = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+    return resp.json()["choices"][0]["message"]["content"]
+
+# Пример использования
+if __name__ == "__main__":
+    while True:
+        q = input("\nЗадайте вопрос о погоде (или другое): ")
+        if q.lower() == "выход": break
+        answer = ask_groq_with_weather(q)
+        print(f"🤖 AI: {answer}")</pre></div>
+        <div class="note">
+            ✨ <strong>Важно:</strong> Эта версия не использует function calling, а просто ищет ключевые слова. В следующей работе мы реализуем более надёжный механизм через инструменты (tools) Groq API.
+        </div>
+        <h3>Задание</h3>
+        <ul>
+            <li>Улучшите распознавание городов (поддержка латиницы, регистронезависимость).</li>
+            <li>Добавьте возможность задать вопрос вроде «Надо ли брать зонт в Витебске?» — пусть AI сам решит, вызывать ли погоду.</li>
+            <li>Оформите код как отдельный модуль с функциями.</li>
+        </ul>
+
+        <!-- ====================== РАБОТА №3 ====================== -->
+        <h2 id="work3">⏱️ Практическая работа №3. Асинхронные запросы и Function Calling</h2>
+        <p><strong>Цель:</strong> научиться использовать встроенный механизм <strong>tools/function calling</strong> Groq API для надёжного получения данных о погоде, а также освоить асинхронные запросы с <code>aiohttp</code> для повышения производительности.</p>
+        <h3>3.1 Function Calling (синхронный вариант)</h3>
+        <div class="code-block"><pre>import os, json, requests
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv("GROQ_API_KEY")
+
+def get_weather_info(city: str) -> str:
+    """Реальная функция, вызываемая AI"""
+    geo = requests.get(f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json").json()
+    if not geo.get("results"):
+        return f"Город {city} не найден"
+    lat, lon = geo["results"][0]["latitude"], geo["results"][0]["longitude"]
+    weather = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true").json()
+    t = weather["current_weather"]["temperature"]
+    w = weather["current_weather"]["windspeed"]
+    return f"🌡️ {t}°C, ветер {w} км/ч"
+
+# Описание инструмента для AI
+weather_tool = {
+    "type": "function",
+    "function": {
+        "name": "get_weather_info",
+        "description": "Возвращает текущую погоду в городе",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string", "description": "Название города"}
+            },
+            "required": ["city"]
+        }
+    }
+}
+
+def chat_with_tools():
+    messages = [{"role": "system", "content": "Ты помощник. Если спрашивают погоду, используй функцию get_weather_info."}]
+    while True:
+        user = input("\nВы: ")
+        if user.lower() == "выход": break
+        messages.append({"role": "user", "content": user})
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": messages,
+            "tools": [weather_tool],
+            "tool_choice": "auto",
+            "temperature": 0.7
+        }
+        resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                             json=payload, headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"})
+        data = resp.json()
+        msg = data["choices"][0]["message"]
+        if msg.get("tool_calls"):
+            func_call = msg["tool_calls"][0]["function"]
+            args = json.loads(func_call["arguments"])
+            weather_result = get_weather_info(args["city"])
+            # Отправляем результат функции обратно модели
+            messages.append(msg)  # сохраняем вызов функции
+            messages.append({"role": "tool", "content": weather_result, "tool_call_id": msg["tool_calls"][0]["id"]})
+            # Повторный запрос к модели для финального ответа
+            second_resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                                        json={"model": "llama-3.3-70b-versatile", "messages": messages},
+                                        headers={"Authorization": f"Bearer {API_KEY}"}).json()
+            answer = second_resp["choices"][0]["message"]["content"]
+        else:
+            answer = msg["content"]
+        print(f"🤖 AI: {answer}")
+        messages.append({"role": "assistant", "content": answer})
+
+if __name__ == "__main__":
+    chat_with_tools()</pre></div>
+        <div class="note">
+            🔧 <strong>Механизм:</strong> AI может вернуть <code>tool_calls</code> вместо обычного ответа. Ваш код перехватывает этот вызов, выполняет реальную функцию, и отправляет результат обратно модели. Так AI получает свежие данные.
+        </div>
+        <h3>3.2 Асинхронная версия (aiohttp)</h3>
+        <div class="code-block"><pre>import asyncio, aiohttp, os, json
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv("GROQ_API_KEY")
+
+async def get_weather_async(session, city):
+    async with session.get(f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json") as resp:
+        geo = await resp.json()
+    if not geo.get("results"): return None
+    lat, lon = geo["results"][0]["latitude"], geo["results"][0]["longitude"]
+    async with session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true") as resp:
+        wdata = await resp.json()
+    return f"{wdata['current_weather']['temperature']}°C, ветер {wdata['current_weather']['windspeed']} км/ч"
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        while True:
+            q = input("\nВаш запрос: ")
+            if q == "выход": break
+            # Здесь можно было бы вызвать Groq и обработать tool_calls асинхронно
+            # Для простоты пока просто погода
+            if "погода" in q.lower():
+                city = q.split()[-1]
+                weather = await get_weather_async(session, city)
+                print(f"🌦️ {weather}")
+            else:
+                print("(Синхронный вызов Groq – вы можете расширить пример)")
+
+if __name__ == "__main__":
+    asyncio.run(main())</pre></div>
+        <h3>Задания</h3>
+        <ul>
+            <li>Добавьте в асинхронный вариант полноценный вызов Groq с поддержкой <code>tool_calls</code>.</li>
+            <li>Реализуйте параллельную отправку нескольких запросов к разным моделям (например, сравнитель ответы Llama 3.3 и Mixtral).</li>
+        </ul>
+
+        <!-- ====================== РАБОТА №4 ====================== -->
+        <h2 id="work4">🤖 Практическая работа №4. LlamaBot — телеграм-бот на Python с Groq</h2>
+        <p><strong>Цель:</strong> создать полноценного Telegram-бота с использованием библиотеки <code>python-telegram-bot</code> и Groq API. Бот будет помнить историю разговора (по каждому пользователю отдельно) и поддерживать системный промпт.</p>
+        <h3>Подготовка</h3>
+        <ul>
+            <li>Установите: <code>pip install python-telegram-bot python-dotenv requests</code></li>
+            <li>Создайте бота в Telegram через <a href="https://t.me/BotFather" target="_blank">@BotFather</a> и получите токен.</li>
+            <li>Добавьте в <code>.env</code>: <code>TELEGRAM_TOKEN=ваш_токен</code> и <code>GROQ_API_KEY=...</code></li>
+        </ul>
+        <div class="code-block"><pre>import os, json, requests
+from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+load_dotenv()
+GROQ_KEY = os.getenv("GROQ_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+# Хранилище истории диалогов (user_id → список сообщений)
+user_sessions = {}
+
+SYSTEM_PROMPT = "Ты весёлый и полезный AI-помощник. Отвечай кратко, добавляй эмодзи."
+
+def get_groq_response(messages):
+    headers = {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": messages,
+        "temperature": 0.8,
+        "max_tokens": 300
+    }
+    resp = requests.post(GROQ_URL, json=payload, headers=headers)
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🤖 Привет! Я LlamaBot на Groq API. Задавай любые вопросы! Используй /clear для сброса истории.")
+
+async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user_sessions[user_id] = []
+    await update.message.reply_text("🧹 История диалога очищена.")
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user_text = update.message.text
+    # Инициализируем историю для пользователя
+    if user_id not in user_sessions:
+        user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    # Добавляем сообщение пользователя
+    user_sessions[user_id].append({"role": "user", "content": user_text})
+    # Ограничиваем длину истории (последние 10 сообщений + system)
+    if len(user_sessions[user_id]) > 12:
+        user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
+    try:
+        answer = get_groq_response(user_sessions[user_id])
+        user_sessions[user_id].append({"role": "assistant", "content": answer})
+        await update.message.reply_text(answer)
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка: {str(e)}")
+
+def main():
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("clear", clear))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    print("Бот запущен...")
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()</pre></div>
+        <div class="note">
+            🚀 <strong>Расширение:</strong> Добавьте поддержку <code>/weather</code> с реальной погодой через function calling, интеграцию с базой данных (SQLite) для сохранения истории между перезапусками, или распознавание изображений (через GPT-4o multimodal, но это уже платно).
+        </div>
+        <h3>Задание со звездочкой ★</h3>
+        <ul>
+            <li>Сделайте команду <code>/stats</code>, которая показывает количество запросов пользователя.</li>
+            <li>Реализуйте выбор модели (пользователь может переключить с Llama 3.3 на Mixtral через команду <code>/model mixtral</code>).</li>
+            <li>Добавьте простейшую фильтрацию нецензурных слов в ответах.</li>
+        </ul>
+
+        <!-- ====================== РЕСУРСЫ ====================== -->
+        <h2 id="resources">📚 Полезные ресурсы</h2>
+        <ul>
+            <li><a href="https://console.groq.com/docs/quickstart" target="_blank">Groq API Documentation</a></li>
+            <li><a href="https://requests.readthedocs.io/" target="_blank">Библиотека Requests (Python)</a></li>
+            <li><a href="https://docs.aiohttp.org/" target="_blank">Aiohttp — асинхронные HTTP-запросы</a></li>
+            <li><a href="https://python-telegram-bot.org/" target="_blank">python-telegram-bot документация</a></li>
+            <li><a href="https://open-meteo.com/" target="_blank">Open-Meteo — бесплатный API погоды</a></li>
+        </ul>
+        <div class="note warning">
+            ⚠️ Все работы выполняйте в виртуальном окружении. Никогда не публикуйте свои API-ключи в открытом доступе! Файл <code>.env</code> обязательно добавьте в <code>.gitignore</code>.
+        </div>
+        <hr>
+        <div style="text-align: center; margin: 1rem 0;">
+            <p>✅ После выполнения всех работ вы сможете создавать AI-приложения любой сложности: от консольных чатов до Telegram-ботов с реальными данными.</p>
+        </div>
+    </main>
+    <footer>
+        Учебные материалы для направления «Проектирование ИИ-решений на Python» | УО "Национальный детский технопарк"<br>
+        Python 3.10+, Groq API, рекомендуемая IDE — PyCharm Community.
+    </footer>
+</div>
+</body>
+</html>
