@@ -132,30 +132,6 @@
             background: #fee2e2;
             border-left: 4px solid #dc2626;
         }
-        .task-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1.2rem;
-            margin: 1.5rem 0;
-        }
-        .task-card {
-            background: #f9fbfd;
-            border: 1px solid #e2edf2;
-            border-radius: 12px;
-            padding: 1rem 1.2rem;
-        }
-        .task-card h4 {
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .step-hint {
-            background: #f0f4f8;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
         details {
             margin-top: 1rem;
             margin-bottom: 1rem;
@@ -202,14 +178,13 @@
     <nav>
         <a href="#work1">Работа №1</a>
         <a href="#work2">Работа №2</a>
-        <a href="#work3">Работа №3</a>
         <a href="#work4">Работа №4</a>
         <a href="#resources">Ресурсы</a>
     </nav>
     <main>
         <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3 и другим моделям), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python. Все задания выполняются в среде PyCharm или VS Code.</p>
         <div class="note">
-            🔑 <strong>Подготовка:</strong> зарегистрируйтесь на <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key. Скопируйте ключ (начинается с <code>gsk_</code>). Установите библиотеки: <code>pip install requests python-dotenv</code>.
+            🔑 <strong>Подготовка:</strong> зарегистрируйтесь на <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key. Скопируйте ключ (начинается с <code>gsk_</code>). Установите библиотеки: <code>pip install requests python-dotenv aiohttp aiogram</code>.
         </div>
 
         <!-- ====================== РАБОТА №1 ====================== -->
@@ -331,38 +306,87 @@ while True:
         <!-- ====================== РАБОТА №2 ====================== -->
         <h2 id="work2">🌤️ Практическая работа №2. AI с реальными данными о погоде</h2>
         <p><strong>Цель:</strong> объединить вызов внешнего API погоды с Groq — AI будет отвечать на вопросы, используя реальные данные.</p>
-        <div class="code-block"><pre>import os, requests
+
+        <h3>🎯 Базовый вариант (только погода, без ИИ)</h3>
+        <div class="code-block"><pre>import requests
+
+while True:
+    city = input("\n🌍 Введите город (на английском, 'выход' для завершения): ").strip()
+    if city.lower() in ("выход", "exit"):
+        break
+
+    # 1. Получаем координаты города
+    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json"
+    geo_resp = requests.get(geo_url).json()
+    if not geo_resp.get("results"):
+        print("❌ Город не найден. Попробуйте ещё раз.")
+        continue
+
+    lat = geo_resp["results"][0]["latitude"]
+    lon = geo_resp["results"][0]["longitude"]
+
+    # 2. Получаем погоду по координатам
+    weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+    weather_resp = requests.get(weather_url).json()
+    temp = weather_resp["current_weather"]["temperature"]
+    wind = weather_resp["current_weather"]["windspeed"]
+
+    print(f"✅ {city}: {temp}°C, ветер {wind} км/ч")</pre></div>
+
+        <h3>🤖 Расширенный вариант: погода + советы от Groq (с .env)</h3>
+        <div class="code-block"><pre>import os
+import requests
 from dotenv import load_dotenv
+
 load_dotenv()
-API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def get_weather(city):
-    geo = requests.get(f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json").json()
-    if not geo.get("results"): return None
-    lat, lon = geo["results"][0]["latitude"], geo["results"][0]["longitude"]
-    w = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true").json()
-    return f"{w['current_weather']['temperature']}°C, ветер {w['current_weather']['windspeed']} км/ч"
+    """Возвращает (температура, ветер) или (None, None)"""
+    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json"
+    geo_resp = requests.get(geo_url).json()
+    if not geo_resp.get("results"):
+        return None, None
+    lat = geo_resp["results"][0]["latitude"]
+    lon = geo_resp["results"][0]["longitude"]
+    weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+    w = requests.get(weather_url).json()
+    temp = w["current_weather"]["temperature"]
+    wind = w["current_weather"]["windspeed"]
+    return temp, wind
 
 def ask_groq(prompt):
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
-                         json={"model": "llama-3.3-70b-versatile", "messages": [{"role": "user", "content": prompt}]},
-                         headers=headers)
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 200
+    }
+    resp = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
     return resp.json()["choices"][0]["message"]["content"]
 
 while True:
-    q = input("\nВы: ")
-    if q.lower() in ("exit","выход"): break
-    if "погод" in q.lower():
-        city = q.split()[-1]
-        weather = get_weather(city)
-        if weather:
-            prompt = f"Пользователь спросил: '{q}'. Реальная погода в {city}: {weather}. Ответь кратко."
-        else:
-            prompt = f"Пользователь спросил о погоде в {city}, но город не найден. Сообщи об этом."
-    else:
-        prompt = q
-    print(f"🤖 AI: {ask_groq(prompt)}")</pre></div>
+    city = input("\n🌍 Введите город на английском (или 'выход'): ").strip()
+    if city.lower() in ("выход", "exit"):
+        break
+
+    temp, wind = get_weather(city)
+    if temp is None:
+        print("❌ Город не найден, попробуйте ещё раз.")
+        continue
+
+    print(f"\n🌡️ Погода в {city}: {temp}°C, ветер {wind} км/ч")
+
+    prompt = f"""Погода: температура {temp}°C, ветер {wind} км/ч.
+Дай краткий совет (2-3 предложения): как одеваться, нужен ли зонт/шапка, стоит ли выходить на улицу.
+Ответь дружелюбно, без лишних слов."""
+
+    advice = ask_groq(prompt)
+    print(f"💡 Совет от ИИ: {advice}")</pre></div>
 
         <h3>✨ Дополнительные решения</h3>
         <details>
@@ -389,161 +413,112 @@ else:
     prompt = q</pre></div>
         </details>
 
-        <!-- ====================== РАБОТА №3 ====================== -->
-        <h2 id="work3">⏱️ Практическая работа №3. Function Calling и асинхронные запросы</h2>
-        <p><strong>Цель:</strong> использовать механизм <code>tools</code> (function calling) Groq API и асинхронный HTTP.</p>
-        <h3>Синхронный вариант с tools</h3>
-        <div class="code-block"><pre>import os, json, requests
-from dotenv import load_dotenv
-load_dotenv()
-API_KEY = os.getenv("GROQ_API_KEY")
-URL = "https://api.groq.com/openai/v1/chat/completions"
-
-def get_weather_info(city):
-    geo = requests.get(f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json").json()
-    if not geo.get("results"): return f"Город {city} не найден"
-    lat, lon = geo["results"][0]["latitude"], geo["results"][0]["longitude"]
-    w = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true").json()
-    return f"{w['current_weather']['temperature']}°C, ветер {w['current_weather']['windspeed']} км/ч"
-
-weather_tool = {
-    "type": "function",
-    "function": {
-        "name": "get_weather_info",
-        "description": "Возвращает погоду в городе",
-        "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}
-    }
-}
-
-messages = [{"role": "system", "content": "Ты помощник. Если спрашивают погоду, используй функцию get_weather_info."}]
-while True:
-    user = input("\nВы: ")
-    if user.lower() in ("выход","exit"): break
-    messages.append({"role": "user", "content": user})
-    payload = {"model": "llama-3.3-70b-versatile", "messages": messages, "tools": [weather_tool], "tool_choice": "auto"}
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    resp = requests.post(URL, json=payload, headers=headers).json()
-    msg = resp["choices"][0]["message"]
-    if msg.get("tool_calls"):
-        args = json.loads(msg["tool_calls"][0]["function"]["arguments"])
-        weather = get_weather_info(args["city"])
-        messages.append(msg)
-        messages.append({"role": "tool", "content": weather, "tool_call_id": msg["tool_calls"][0]["id"]})
-        final = requests.post(URL, json={"model": "llama-3.3-70b-versatile", "messages": messages}, headers=headers).json()
-        answer = final["choices"][0]["message"]["content"]
-    else:
-        answer = msg["content"]
-    print(f"🤖 AI: {answer}")
-    messages.append({"role": "assistant", "content": answer})</pre></div>
-
-        <h3>✨ Дополнительные решения</h3>
-        <details>
-            <summary>📌 Асинхронный вызов погоды (aiohttp) – полный пример</summary>
-            <div class="code-block"><pre>import asyncio, aiohttp, os
-from dotenv import load_dotenv
-load_dotenv()
-API_KEY = os.getenv("GROQ_API_KEY")
-
-async def get_weather_async(session, city):
-    async with session.get(f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json") as resp:
-        geo = await resp.json()
-    if not geo.get("results"): return None
-    lat, lon = geo["results"][0]["latitude"], geo["results"][0]["longitude"]
-    async with session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true") as resp:
-        w = await resp.json()
-    return f"{w['current_weather']['temperature']}°C, ветер {w['current_weather']['windspeed']} км/ч"
-
-async def main():
-    async with aiohttp.ClientSession() as session:
-        while True:
-            city = input("Город (англ): ")
-            if city == "exit": break
-            weather = await get_weather_async(session, city)
-            print(weather if weather else "Город не найден")
-asyncio.run(main())</pre></div>
-        </details>
-        <details>
-            <summary>📌 Параллельные запросы к нескольким городам</summary>
-            <div class="code-block"><pre>cities = ["Minsk", "Paris", "London", "Tokyo"]
-async def fetch_all():
-    async with aiohttp.ClientSession() as session:
-        tasks = [get_weather_async(session, city) for city in cities]
-        results = await asyncio.gather(*tasks)
-        for city, res in zip(cities, results):
-            print(f"{city}: {res}")
-asyncio.run(fetch_all())</pre></div>
-        </details>
-
         <!-- ====================== РАБОТА №4 ====================== -->
-        <h2 id="work4">🤖 Практическая работа №4. LlamaBot — телеграм-бот на Python с Groq</h2>
-        <p><strong>Цель:</strong> создать полноценного Telegram-бота с использованием <code>python-telegram-bot</code> и Groq API.</p>
-        <div class="code-block"><pre>import os, requests
+        <h2 id="work4">🤖 Практическая работа №4. LlamaBot — телеграм-бот на aiogram + Groq</h2>
+        <p><strong>Цель:</strong> создать полноценного асинхронного Telegram-бота с использованием библиотеки <code>aiogram</code> и Groq API.</p>
+        <div class="code-block"><pre>import os
+import aiohttp
 from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+import asyncio
 
 load_dotenv()
-GROQ_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+# Хранилище истории для каждого пользователя
 user_sessions = {}
-SYSTEM = "Ты весёлый помощник. Отвечай кратко, добавляй эмодзи."
+SYSTEM_PROMPT = "Ты весёлый и полезный AI-помощник. Отвечай кратко, добавляй эмодзи."
 
-def get_groq_response(messages):
-    headers = {"Authorization": f"Bearer {GROQ_KEY}"}
-    payload = {"model": "llama-3.3-70b-versatile", "messages": messages, "temperature": 0.8}
-    resp = requests.post(GROQ_URL, json=payload, headers=headers)
-    return resp.json()["choices"][0]["message"]["content"]
+async def get_groq_response(messages):
+    """Асинхронный запрос к Groq API через aiohttp"""
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": messages,
+        "temperature": 0.8,
+        "max_tokens": 300
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(GROQ_URL, json=payload, headers=headers) as resp:
+            data = await resp.json()
+            return data["choices"][0]["message"]["content"]
 
-async def start(update, context):
-    await update.message.reply_text("🤖 Привет! Я LlamaBot. /clear – очистить историю.")
+# Инициализация бота и диспетчера
+bot = Bot(token=TELEGRAM_TOKEN)
+dp = Dispatcher()
 
-async def clear(update, context):
-    user_sessions[update.effective_user.id] = []
-    await update.message.reply_text("🧹 История очищена.")
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer("🤖 Привет! Я LlamaBot на Groq API и aiogram. Задавай любые вопросы! /clear – очистить историю.")
 
-async def handle_message(update, context):
-    user_id = update.effective_user.id
-    text = update.message.text
+@dp.message(Command("clear"))
+async def cmd_clear(message: types.Message):
+    user_id = message.from_user.id
+    user_sessions[user_id] = []
+    await message.answer("🧹 История диалога очищена.")
+
+@dp.message()
+async def handle_message(message: types.Message):
+    user_id = message.from_user.id
+    text = message.text
+
+    # Инициализируем историю для пользователя
     if user_id not in user_sessions:
-        user_sessions[user_id] = [{"role": "system", "content": SYSTEM}]
+        user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    # Добавляем сообщение пользователя
     user_sessions[user_id].append({"role": "user", "content": text})
+
+    # Ограничиваем длину истории (системный промпт + последние 10 сообщений)
     if len(user_sessions[user_id]) > 12:
         user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
-    answer = get_groq_response(user_sessions[user_id])
-    user_sessions[user_id].append({"role": "assistant", "content": answer})
-    await update.message.reply_text(answer)
 
-def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("clear", clear))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
+    try:
+        answer = await get_groq_response(user_sessions[user_id])
+        user_sessions[user_id].append({"role": "assistant", "content": answer})
+        await message.answer(answer)
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {str(e)}")
+
+async def main():
+    print("Бот запущен (aiogram)...")
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    main()</pre></div>
+    asyncio.run(main())</pre></div>
+        <p>📦 <strong>Установка зависимостей:</strong> <code>pip install aiogram aiohttp python-dotenv</code></p>
 
         <h3>✨ Дополнительные решения</h3>
         <details>
             <summary>📌 Команда /stats (сколько запросов сделал пользователь)</summary>
             <div class="code-block"><pre>user_stats = {}
-async def stats(update, context):
-    uid = update.effective_user.id
+@dp.message(Command("stats"))
+async def cmd_stats(message: types.Message):
+    uid = message.from_user.id
     count = user_stats.get(uid, 0)
-    await update.message.reply_text(f"📊 Вы сделали {count} запросов.")
-# В handle_message увеличиваем счётчик
+    await message.answer(f"📊 Вы сделали {count} запросов.")
+
+# В обработчике handle_message увеличиваем счётчик:
 user_stats[user_id] = user_stats.get(user_id, 0) + 1</pre></div>
         </details>
         <details>
             <summary>📌 Выбор модели (/model mixtral)</summary>
             <div class="code-block"><pre>user_model = {}
-async def set_model(update, context):
-    model = context.args[0] if context.args else "llama-3.3-70b-versatile"
-    user_model[update.effective_user.id] = model
-    await update.message.reply_text(f"Модель изменена на {model}")
-# В get_groq_response() замените "model" на user_model.get(user_id, базовая)</pre></div>
+@dp.message(Command("model"))
+async def cmd_model(message: types.Message):
+    args = message.text.split()
+    model = args[1] if len(args) > 1 else "llama-3.3-70b-versatile"
+    user_model[message.from_user.id] = model
+    await message.answer(f"Модель изменена на {model}")
+
+# В функции get_groq_response используйте payload["model"] = user_model.get(user_id, default)</pre></div>
         </details>
         <details>
             <summary>📌 Простейшая фильтрация нецензурных слов в ответах (замена на ***)</summary>
@@ -552,7 +527,7 @@ def censor(text):
     for word in bad_words:
         text = text.replace(word, "***")
     return text
-# После получения answer = get_groq_response(...)
+# После получения answer = await get_groq_response(...)
 answer = censor(answer)</pre></div>
         </details>
 
@@ -561,8 +536,8 @@ answer = censor(answer)</pre></div>
         <ul>
             <li><a href="https://console.groq.com/docs/quickstart" target="_blank">Groq API Documentation</a></li>
             <li><a href="https://requests.readthedocs.io/" target="_blank">Библиотека Requests</a></li>
-            <li><a href="https://docs.aiohttp.org/" target="_blank">Aiohttp — асинхронные запросы</a></li>
-            <li><a href="https://python-telegram-bot.org/" target="_blank">python-telegram-bot</a></li>
+            <li><a href="https://docs.aiohttp.org/" target="_blank">Aiohttp — асинхронные HTTP-запросы</a></li>
+            <li><a href="https://docs.aiogram.dev/" target="_blank">aiogram — асинхронный фреймворк для Telegram ботов</a></li>
             <li><a href="https://open-meteo.com/" target="_blank">Open-Meteo — бесплатный API погоды</a></li>
         </ul>
         <div class="note warning">
