@@ -112,15 +112,6 @@
             font-size: 0.85rem;
             font-family: monospace;
         }
-        .file-path {
-            background: #eef2f6;
-            font-family: monospace;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-            display: inline-block;
-            font-size: 0.8rem;
-            margin: 0.5rem 0;
-        }
         .note {
             background: #fef9e3;
             border-left: 4px solid #ffb347;
@@ -178,7 +169,7 @@
     <nav>
         <a href="#work1">Работа №1</a>
         <a href="#work2">Работа №2</a>
-        <a href="#work4">Работа №4</a>
+        <a href="#work3">Работа №3</a>
         <a href="#resources">Ресурсы</a>
     </nav>
     <main>
@@ -228,7 +219,7 @@ if __name__ == "__main__":
 
         <h3>✨ Дополнительные задания и их решения</h3>
         <details>
-            <summary>📌 Задание 1: Добавить команду /history, которая показывает последние 5 сообщений</summary>
+            <summary>📌 Задание 1.1: Добавить команду /history, которая показывает последние 5 сообщений</summary>
             <div class="code-block"><pre># Модифицируем код: добавляем глобальный список history
 history = []
 
@@ -244,7 +235,7 @@ if user_input == "/history":
     continue  # пропускаем обычный запрос к API</pre></div>
         </details>
         <details>
-            <summary>📌 Задание 2: Реализовать ограничение длины контекста (последние 10 сообщений) и изменять температуру</summary>
+            <summary>📌 Задание 1.2: Реализовать ограничение длины контекста и изменять температуру</summary>
             <div class="code-block"><pre># Ограничиваем историю (храним только последние 10 сообщений)
 if len(history) > 10:
     history = history[-10:]
@@ -253,12 +244,12 @@ if len(history) > 10:
 messages_for_api = [{"role": "system", "content": system}] + history
 
 # Изменяем temperature (например, даём пользователю ввести значение)
-temp = float(input("Введите температуру (0.1 - 1.2): "))  # добавляем запрос
+temp = float(input("Введите температуру (0.1 - 1.2): "))
 payload["temperature"] = temp</pre></div>
-            <div class="note">📝 <strong>Что такое температура?</strong> В Groq API параметр называется <code>temperature</code>. При низких значениях (0.1–0.3) ответы сухие и фактологичные, при высоких (0.8–1.2) — креативные и неожиданные. Экспериментируйте!</div>
+            <div class="note">📝 <strong>Что такое температура?</strong> В Groq API параметр называется <code>temperature</code>. Чем ниже значение, тем более сухие и фактологичные ответы; чем выше — тем креативнее.</div>
         </details>
         <details>
-            <summary>📌 Задание 3 (★): Полностью рабочий скрипт с историей, очисткой и регулировкой температуры</summary>
+            <summary>📌 Задание 1.3 (★): Полноценный скрипт с историей, очисткой и регулировкой температуры</summary>
             <div class="code-block"><pre>import os, requests
 from dotenv import load_dotenv
 load_dotenv()
@@ -315,7 +306,6 @@ while True:
     if city.lower() in ("выход", "exit"):
         break
 
-    # 1. Получаем координаты города
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json"
     geo_resp = requests.get(geo_url).json()
     if not geo_resp.get("results"):
@@ -324,13 +314,10 @@ while True:
 
     lat = geo_resp["results"][0]["latitude"]
     lon = geo_resp["results"][0]["longitude"]
-
-    # 2. Получаем погоду по координатам
     weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
     weather_resp = requests.get(weather_url).json()
     temp = weather_resp["current_weather"]["temperature"]
     wind = weather_resp["current_weather"]["windspeed"]
-
     print(f"✅ {city}: {temp}°C, ветер {wind} км/ч")</pre></div>
 
         <h3>🤖 Расширенный вариант: погода + советы от Groq (с .env)</h3>
@@ -342,7 +329,6 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def get_weather(city):
-    """Возвращает (температура, ветер) или (None, None)"""
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json"
     geo_resp = requests.get(geo_url).json()
     if not geo_resp.get("results"):
@@ -356,10 +342,7 @@ def get_weather(city):
     return temp, wind
 
 def ask_groq(prompt):
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
@@ -373,24 +356,20 @@ while True:
     city = input("\n🌍 Введите город на английском (или 'выход'): ").strip()
     if city.lower() in ("выход", "exit"):
         break
-
     temp, wind = get_weather(city)
     if temp is None:
         print("❌ Город не найден, попробуйте ещё раз.")
         continue
-
     print(f"\n🌡️ Погода в {city}: {temp}°C, ветер {wind} км/ч")
-
     prompt = f"""Погода: температура {temp}°C, ветер {wind} км/ч.
 Дай краткий совет (2-3 предложения): как одеваться, нужен ли зонт/шапка, стоит ли выходить на улицу.
 Ответь дружелюбно, без лишних слов."""
-
     advice = ask_groq(prompt)
     print(f"💡 Совет от ИИ: {advice}")</pre></div>
 
         <h3>✨ Дополнительные решения</h3>
         <details>
-            <summary>📌 Улучшенное распознавание городов (латиница + кириллица, регистронезависимость)</summary>
+            <summary>📌 Задание 2.1: Улучшенное распознавание городов (кириллица + латиница)</summary>
             <div class="code-block"><pre>city_map = {
     "минск": "Minsk", "москва": "Moscow", "киев": "Kyiv",
     "питер": "Saint Petersburg", "брест": "Brest", "гродно": "Grodno"
@@ -400,11 +379,10 @@ def extract_city(text):
     for ru, en in city_map.items():
         if ru in text_lower:
             return en
-    # если ничего не нашли, берём последнее слово
     return text.split()[-1].strip(",.?!")</pre></div>
         </details>
         <details>
-            <summary>📌 Добавление логики «Надо ли брать зонт?» – AI сам решает, вызывать погоду или нет</summary>
+            <summary>📌 Задание 2.2: Логика «Надо ли брать зонт?» с вызовом погоды</summary>
             <div class="code-block"><pre>if "зонт" in q.lower() or "погод" in q.lower():
     city = extract_city(q)
     weather = get_weather(city)
@@ -413,11 +391,51 @@ else:
     prompt = q</pre></div>
         </details>
 
-        <!-- ====================== РАБОТА №4 ====================== -->
-        <h2 id="work4">🤖 Практическая работа №4. LlamaBot — телеграм-бот на aiogram + Groq</h2>
-        <p><strong>Цель:</strong> создать полноценного асинхронного Telegram-бота с использованием библиотеки <code>aiogram</code> и Groq API.</p>
+        <!-- ====================== РАБОТА №3 ====================== -->
+        <h2 id="work3">🤖 Практическая работа №3. Асинхронный Telegram-бот на aiogram + Groq</h2>
+        <p><strong>Цель:</strong> создать масштабируемого Telegram-бота с использованием библиотеки <code>aiogram</code> (асинхронный фреймворк) и Groq API, а также научиться интегрировать парсинг данных.</p>
+
+        <div class="note">
+            <strong>⚡ Почему aiogram?</strong><br>
+            <ul>
+                <li><strong>Асинхронность:</strong> aiogram построен на asyncio, позволяет обрабатывать много сообщений одновременно без блокировок.</li>
+                <li><strong>Современная архитектура:</strong> поддержка FSM (конечные автоматы), роутеры, мидлвари.</li>
+                <li><strong>Производительность:</strong> при высокой нагрузке aiogram значительно быстрее синхронных аналогов.</li>
+                <li><strong>Стандарт:</strong> aiogram — де-факто стандарт для новых проектов на Python.</li>
+            </ul>
+            В этом задании вы пройдёте путь от простого эхо-бота до полноценного AI-ассистента с парсингом внешних данных.
+        </div>
+
+        <h3>🎯 Базовое задание 3.1: Эхо-бот (проверка подключения)</h3>
         <div class="code-block"><pre>import os
-import aiohttp
+from dotenv import load_dotenv
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+import asyncio
+
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+bot = Bot(token=TELEGRAM_TOKEN)
+dp = Dispatcher()
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer("Привет! Я эхо-бот. Просто напиши мне что-нибудь.")
+
+@dp.message()
+async def echo(message: types.Message):
+    await message.answer(f"Эхо: {message.text}")
+
+async def main():
+    print("Бот запущен")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())</pre></div>
+
+        <h3>🚀 Задание 3.2: Добавляем Groq API (без истории)</h3>
+        <div class="code-block"><pre>import os, aiohttp
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -426,109 +444,110 @@ import asyncio
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-# Хранилище истории для каждого пользователя
-user_sessions = {}
-SYSTEM_PROMPT = "Ты весёлый и полезный AI-помощник. Отвечай кратко, добавляй эмодзи."
+bot = Bot(token=TELEGRAM_TOKEN)
+dp = Dispatcher()
 
-async def get_groq_response(messages):
-    """Асинхронный запрос к Groq API через aiohttp"""
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
+async def ask_groq(prompt):
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
-        "messages": messages,
-        "temperature": 0.8,
-        "max_tokens": 300
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 200
     }
     async with aiohttp.ClientSession() as session:
         async with session.post(GROQ_URL, json=payload, headers=headers) as resp:
             data = await resp.json()
             return data["choices"][0]["message"]["content"]
 
-# Инициализация бота и диспетчера
-bot = Bot(token=TELEGRAM_TOKEN)
-dp = Dispatcher()
-
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("🤖 Привет! Я LlamaBot на Groq API и aiogram. Задавай любые вопросы! /clear – очистить историю.")
-
-@dp.message(Command("clear"))
-async def cmd_clear(message: types.Message):
-    user_id = message.from_user.id
-    user_sessions[user_id] = []
-    await message.answer("🧹 История диалога очищена.")
+    await message.answer("🤖 Я AI-бот на Groq. Задавай любые вопросы!")
 
 @dp.message()
 async def handle_message(message: types.Message):
-    user_id = message.from_user.id
-    text = message.text
-
-    # Инициализируем историю для пользователя
-    if user_id not in user_sessions:
-        user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
-
-    # Добавляем сообщение пользователя
-    user_sessions[user_id].append({"role": "user", "content": text})
-
-    # Ограничиваем длину истории (системный промпт + последние 10 сообщений)
-    if len(user_sessions[user_id]) > 12:
-        user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
-
-    try:
-        answer = await get_groq_response(user_sessions[user_id])
-        user_sessions[user_id].append({"role": "assistant", "content": answer})
-        await message.answer(answer)
-    except Exception as e:
-        await message.answer(f"❌ Ошибка: {str(e)}")
+    answer = await ask_groq(message.text)
+    await message.answer(answer)
 
 async def main():
-    print("Бот запущен (aiogram)...")
+    print("Бот с Groq запущен")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
-        <p>📦 <strong>Установка зависимостей:</strong> <code>pip install aiogram aiohttp python-dotenv</code></p>
 
-        <h3>✨ Дополнительные решения</h3>
+        <h3>🧠 Задание 3.3: Добавляем контекст диалога (историю)</h3>
+        <div class="code-block"><pre># Модифицируем код: добавляем словарь user_sessions
+user_sessions = {}
+SYSTEM_PROMPT = "Ты дружелюбный AI-помощник. Отвечай кратко, добавляй эмодзи."
+
+async def ask_groq_with_history(user_id, text):
+    if user_id not in user_sessions:
+        user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    user_sessions[user_id].append({"role": "user", "content": text})
+    # Ограничиваем длину (системный + последние 10 сообщений)
+    if len(user_sessions[user_id]) > 12:
+        user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": user_sessions[user_id],
+        "temperature": 0.8,
+        "max_tokens": 300
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(GROQ_URL, json=payload, headers=headers) as resp:
+            data = await resp.json()
+            answer = data["choices"][0]["message"]["content"]
+    user_sessions[user_id].append({"role": "assistant", "content": answer})
+    return answer
+
+@dp.message(Command("clear"))
+async def cmd_clear(message: types.Message):
+    user_sessions[message.from_user.id] = []
+    await message.answer("🧹 История очищена.")
+
+@dp.message()
+async def handle_message(message: types.Message):
+    answer = await ask_groq_with_history(message.from_user.id, message.text)
+    await message.answer(answer)</pre></div>
+
+        <h3>📊 Задание 3.4 (★): Добавляем парсинг курса валют (или новостей) и интеграцию с Groq</h3>
+        <p>Расширьте бота: пусть он может отвечать на вопрос «Курс доллара» или «Курс евро», получая реальные данные с бесплатного API (например, <a href="https://exchangerate.host" target="_blank">exchangerate.host</a>). Затем через Groq сформулируйте ответ.</p>
+        <div class="code-block"><pre>async def get_exchange_rate(currency):
+    url = f"https://api.exchangerate.host/latest?base=USD&symbols={currency}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            data = await resp.json()
+            rate = data["rates"][currency]
+            return rate
+
+# В обработчике сообщений:
+if "курс" in text.lower() and ("доллар" in text.lower() or "usd" in text.lower()):
+    rate = await get_exchange_rate("RUB")
+    prompt = f"Курс доллара к рублю: {rate} RUB за 1 USD. Дай краткий ответ пользователю: '{text}'"
+    answer = await ask_groq_without_history(prompt)  # или с историей
+    await message.answer(answer)</pre></div>
+        <p>Аналогично можно добавить парсинг новостей (через RSS) или других данных.</p>
+
+        <h3>📌 Итоговые задания к работе №3</h3>
         <details>
-            <summary>📌 Команда /stats (сколько запросов сделал пользователь)</summary>
-            <div class="code-block"><pre>user_stats = {}
-@dp.message(Command("stats"))
-async def cmd_stats(message: types.Message):
-    uid = message.from_user.id
-    count = user_stats.get(uid, 0)
-    await message.answer(f"📊 Вы сделали {count} запросов.")
-
-# В обработчике handle_message увеличиваем счётчик:
-user_stats[user_id] = user_stats.get(user_id, 0) + 1</pre></div>
+            <summary>📌 Задание 3.1: Реализовать эхо-бота и убедиться в работоспособности токена</summary>
+            <div class="code-block"><pre>Скопируйте базовый код, добавьте .env с TELEGRAM_TOKEN, запустите. Бот должен повторять введённый текст.</pre></div>
         </details>
         <details>
-            <summary>📌 Выбор модели (/model mixtral)</summary>
-            <div class="code-block"><pre>user_model = {}
-@dp.message(Command("model"))
-async def cmd_model(message: types.Message):
-    args = message.text.split()
-    model = args[1] if len(args) > 1 else "llama-3.3-70b-versatile"
-    user_model[message.from_user.id] = model
-    await message.answer(f"Модель изменена на {model}")
-
-# В функции get_groq_response используйте payload["model"] = user_model.get(user_id, default)</pre></div>
+            <summary>📌 Задание 3.2: Добавить интеграцию с Groq (без истории)</summary>
+            <div class="code-block"><pre>Замените эхо на вызов ask_groq. Бот должен отвечать на любые вопросы с помощью Llama 3.3.</pre></div>
         </details>
         <details>
-            <summary>📌 Простейшая фильтрация нецензурных слов в ответах (замена на ***)</summary>
-            <div class="code-block"><pre>bad_words = ["плохое_слово1", "плохое_слово2"]
-def censor(text):
-    for word in bad_words:
-        text = text.replace(word, "***")
-    return text
-# После получения answer = await get_groq_response(...)
-answer = censor(answer)</pre></div>
+            <summary>📌 Задание 3.3: Добавить историю контекста и команду /clear</summary>
+            <div class="code-block"><pre>Реализуйте user_sessions, добавьте /clear. Проверьте, что бот помнит последние сообщения.</pre></div>
+        </details>
+        <details>
+            <summary>📌 Задание 3.4 (★): Интеграция с API курса валют или погоды</summary>
+            <div class="code-block"><pre>Добавьте обработку команды /usd или распознавание фразы «курс доллара». Получите реальный курс с exchangerate.host и верните ответ, сформулированный Groq.</pre></div>
         </details>
 
         <!-- ====================== РЕСУРСЫ ====================== -->
@@ -539,6 +558,7 @@ answer = censor(answer)</pre></div>
             <li><a href="https://docs.aiohttp.org/" target="_blank">Aiohttp — асинхронные HTTP-запросы</a></li>
             <li><a href="https://docs.aiogram.dev/" target="_blank">aiogram — асинхронный фреймворк для Telegram ботов</a></li>
             <li><a href="https://open-meteo.com/" target="_blank">Open-Meteo — бесплатный API погоды</a></li>
+            <li><a href="https://exchangerate.host" target="_blank">ExchangeRate.host — бесплатный API курсов валют</a></li>
         </ul>
         <div class="note warning">
             ⚠️ Всегда храните API-ключи в файле <code>.env</code>, добавьте его в <code>.gitignore</code>. Никогда не публикуйте ключи в открытом доступе.
@@ -548,7 +568,7 @@ answer = censor(answer)</pre></div>
         </div>
         <hr>
         <div style="text-align: center; margin: 1rem 0;">
-            <p>✅ После выполнения всех работ вы сможете создавать AI-приложения любой сложности: от консольных чатов до Telegram-ботов с реальными данными.</p>
+            <p>✅ После выполнения всех работ вы сможете создавать AI-приложения любой сложности: от консольных чатов до Telegram-ботов с реальными данными и парсингом.</p>
         </div>
     </main>
     <footer>
