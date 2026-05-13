@@ -371,7 +371,7 @@ while True:
     advice = ask_groq(prompt)
     print(f"💡 Совет от ИИ: {advice}")</pre></div>
 
-        <h3>✨ Дополнительные решения (исправлены)</h3>
+        <h3>✨ Дополнительные решения</h3>
         <details>
             <summary>📌 Улучшенное распознавание городов (кириллица + латиница)</summary>
             <div class="code-block"><pre>city_map = {
@@ -386,7 +386,7 @@ def extract_city(text):
     return text.split()[-1].strip(",.?!")</pre></div>
         </details>
         <details>
-            <summary>📌 Логика «Надо ли брать зонт?» с вызовом погоды (ИСПРАВЛЕНО)</summary>
+            <summary>📌 Логика «Надо ли брать зонт?» с вызовом погоды</summary>
             <div class="code-block"><pre># Вставьте этот фрагмент в основной цикл вместо старой обработки погоды
 if "зонт" in user_input.lower() or "погод" in user_input.lower():
     city = extract_city(user_input)
