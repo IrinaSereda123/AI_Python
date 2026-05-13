@@ -173,7 +173,7 @@
         <a href="#resources">Ресурсы</a>
     </nav>
     <main>
-        <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3 и другим моделям), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python. Все задания выполняются в среде PyCharm или VS Code.</p>
+        <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python. Все задания выполняются в среде PyCharm или VS Code.</p>
         <div class="note">
             🔑 <strong>Подготовка:</strong> зарегистрируйтесь на <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key. Скопируйте ключ (начинается с <code>gsk_</code>). Установите библиотеки: <code>pip install requests python-dotenv aiohttp aiogram</code>.
         </div>
@@ -392,21 +392,14 @@ else:
         </details>
 
         <!-- ====================== РАБОТА №3 ====================== -->
-        <h2 id="work3">🤖 Практическая работа №3. Асинхронный Telegram-бот на aiogram + Groq</h2>
-        <p><strong>Цель:</strong> создать масштабируемого Telegram-бота с использованием библиотеки <code>aiogram</code> (асинхронный фреймворк) и Groq API, а также научиться интегрировать парсинг данных.</p>
+        <h2 id="work3">🤖 Практическая работа №3. Telegram-бот (aiogram) + Groq + курс валют НБРБ</h2>
+        <p><strong>Цель:</strong> создать асинхронного Telegram-бота на aiogram, интегрировать Groq API для умных ответов, добавить историю диалога и запрос курса валют через API Национального банка Республики Беларусь.</p>
 
         <div class="note">
-            <strong>⚡ Почему aiogram?</strong><br>
-            <ul>
-                <li><strong>Асинхронность:</strong> aiogram построен на asyncio, позволяет обрабатывать много сообщений одновременно без блокировок.</li>
-                <li><strong>Современная архитектура:</strong> поддержка FSM (конечные автоматы), роутеры, мидлвари.</li>
-                <li><strong>Производительность:</strong> при высокой нагрузке aiogram значительно быстрее синхронных аналогов.</li>
-                <li><strong>Стандарт:</strong> aiogram — де-факто стандарт для новых проектов на Python.</li>
-            </ul>
-            В этом задании вы пройдёте путь от простого эхо-бота до полноценного AI-ассистента с парсингом внешних данных.
+            <strong>⚡ Почему aiogram?</strong> Асинхронный фреймворк, высокая производительность, поддержка FSM и роутеров. Стандарт для современных ботов на Python.
         </div>
 
-        <h3>🎯 Базовое задание 3.1: Эхо-бот (проверка подключения)</h3>
+        <h3>🎯 Базовое решение: эхо-бот (проверка токена)</h3>
         <div class="code-block"><pre>import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -421,20 +414,20 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Привет! Я эхо-бот. Просто напиши мне что-нибудь.")
+    await message.answer("Привет! Я эхо-бот. Просто напиши что-нибудь.")
 
 @dp.message()
 async def echo(message: types.Message):
     await message.answer(f"Эхо: {message.text}")
 
 async def main():
-    print("Бот запущен")
+    print("Эхо-бот запущен")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
 
-        <h3>🚀 Задание 3.2: Добавляем Groq API (без истории)</h3>
+        <h3>🚀 Расширенное решение: AI-бот с Groq (без истории)</h3>
         <div class="code-block"><pre>import os, aiohttp
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -472,16 +465,16 @@ async def handle_message(message: types.Message):
     await message.answer(answer)
 
 async def main():
-    print("Бот с Groq запущен")
+    print("AI-бот запущен")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
 
-        <h3>🧠 Задание 3.3: Добавляем контекст диалога (историю)</h3>
-        <div class="code-block"><pre># Модифицируем код: добавляем словарь user_sessions
+        <h3>📌 Дополнительное задание 3.1: Добавить контекст (историю) и команду /clear</h3>
+        <div class="code-block"><pre># Добавляем словарь для хранения истории каждого пользователя
 user_sessions = {}
-SYSTEM_PROMPT = "Ты дружелюбный AI-помощник. Отвечай кратко, добавляй эмодзи."
+SYSTEM_PROMPT = "Ты дружелюбный помощник. Отвечай кратко."
 
 async def ask_groq_with_history(user_id, text):
     if user_id not in user_sessions:
@@ -514,23 +507,108 @@ async def handle_message(message: types.Message):
     answer = await ask_groq_with_history(message.from_user.id, message.text)
     await message.answer(answer)</pre></div>
 
-        <h3>📊 Задание 3.4 (★): Добавляем парсинг курса валют (или новостей) и интеграцию с Groq</h3>
-        <p>Расширьте бота: пусть он может отвечать на вопрос «Курс доллара» или «Курс евро», получая реальные данные с бесплатного API (например, <a href="https://exchangerate.host" target="_blank">exchangerate.host</a>). Затем через Groq сформулируйте ответ.</p>
-        <div class="code-block"><pre>async def get_exchange_rate(currency):
-    url = f"https://api.exchangerate.host/latest?base=USD&symbols={currency}"
+        <h3>📊 Дополнительное задание 3.2: Курс валют через API НБРБ</h3>
+        <p>API Национального банка Беларуси: <code>https://api.nbrb.by/exrates/rates/{cur_id}?parammode=2</code> возвращает курс валюты к белорусскому рублю. Используем ID: USD = 431, EUR = 451.</p>
+        <div class="code-block"><pre>async def get_usd_rate():
+    url = "https://api.nbrb.by/exrates/rates/431?parammode=2"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             data = await resp.json()
-            rate = data["rates"][currency]
-            return rate
+            return data["Cur_OfficialRate"]
+
+async def get_eur_rate():
+    url = "https://api.nbrb.by/exrates/rates/451?parammode=2"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            data = await resp.json()
+            return data["Cur_OfficialRate"]
 
 # В обработчике сообщений:
-if "курс" in text.lower() and ("доллар" in text.lower() or "usd" in text.lower()):
-    rate = await get_exchange_rate("RUB")
-    prompt = f"Курс доллара к рублю: {rate} RUB за 1 USD. Дай краткий ответ пользователю: '{text}'"
-    answer = await ask_groq_without_history(prompt)  # или с историей
+if "курс" in text.lower():
+    if "доллар" in text.lower() or "usd" in text.lower():
+        rate = await get_usd_rate()
+        await message.answer(f"Курс USD к BYN: {rate} руб.")
+    elif "евро" in text.lower() or "eur" in text.lower():
+        rate = await get_eur_rate()
+        await message.answer(f"Курс EUR к BYN: {rate} руб.")
+    else:
+        await message.answer("Напишите 'курс доллара' или 'курс евро'")
+else:
+    # Обычный запрос через Groq
+    answer = await ask_groq_with_history(user_id, text)
     await message.answer(answer)</pre></div>
-        <p>Аналогично можно добавить парсинг новостей (через RSS) или других данных.</p>
+
+        <p>Полный интеграционный пример (все функции вместе):</p>
+        <div class="code-block"><pre>import os, aiohttp
+from dotenv import load_dotenv
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+import asyncio
+
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+bot = Bot(token=TELEGRAM_TOKEN)
+dp = Dispatcher()
+user_sessions = {}
+SYSTEM_PROMPT = "Ты дружелюбный помощник. Отвечай кратко."
+
+async def ask_groq_with_history(user_id, text):
+    if user_id not in user_sessions:
+        user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    user_sessions[user_id].append({"role": "user", "content": text})
+    if len(user_sessions[user_id]) > 12:
+        user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    payload = {"model": "llama-3.3-70b-versatile", "messages": user_sessions[user_id], "temperature": 0.8}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(GROQ_URL, json=payload, headers=headers) as resp:
+            data = await resp.json()
+            answer = data["choices"][0]["message"]["content"]
+    user_sessions[user_id].append({"role": "assistant", "content": answer})
+    return answer
+
+async def get_rate(cur_id):
+    url = f"https://api.nbrb.by/exrates/rates/{cur_id}?parammode=2"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            data = await resp.json()
+            return data["Cur_OfficialRate"]
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer("🤖 Бот с Groq и курсом валют НБРБ. /clear – очистить историю.")
+
+@dp.message(Command("clear"))
+async def cmd_clear(message: types.Message):
+    user_sessions[message.from_user.id] = []
+    await message.answer("🧹 История очищена.")
+
+@dp.message()
+async def handle_message(message: types.Message):
+    text = message.text.lower()
+    user_id = message.from_user.id
+    if "курс" in text:
+        if "доллар" in text or "usd" in text:
+            rate = await get_rate(431)
+            await message.answer(f"🇺🇸 Курс USD к BYN: {rate} руб.")
+        elif "евро" in text or "eur" in text:
+            rate = await get_rate(451)
+            await message.answer(f"🇪🇺 Курс EUR к BYN: {rate} руб.")
+        else:
+            await message.answer("Напишите 'курс доллара' или 'курс евро'")
+    else:
+        answer = await ask_groq_with_history(user_id, message.text)
+        await message.answer(answer)
+
+async def main():
+    print("Бот запущен")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())</pre></div>
 
         <h3>📌 Итоговые задания к работе №3</h3>
         <details>
@@ -546,25 +624,24 @@ if "курс" in text.lower() and ("доллар" in text.lower() or "usd" in te
             <div class="code-block"><pre>Реализуйте user_sessions, добавьте /clear. Проверьте, что бот помнит последние сообщения.</pre></div>
         </details>
         <details>
-            <summary>📌 Задание 3.4 (★): Интеграция с API курса валют или погоды</summary>
-            <div class="code-block"><pre>Добавьте обработку команды /usd или распознавание фразы «курс доллара». Получите реальный курс с exchangerate.host и верните ответ, сформулированный Groq.</pre></div>
+            <summary>📌 Задание 3.4 (★): Интеграция с API курса валют НБРБ</summary>
+            <div class="code-block"><pre>Добавьте обработку фраз «курс доллара», «курс евро» и возврат реального курса из API Нацбанка Беларуси.</pre></div>
         </details>
 
         <!-- ====================== РЕСУРСЫ ====================== -->
         <h2 id="resources">📚 Полезные ресурсы</h2>
         <ul>
             <li><a href="https://console.groq.com/docs/quickstart" target="_blank">Groq API Documentation</a></li>
-            <li><a href="https://requests.readthedocs.io/" target="_blank">Библиотека Requests</a></li>
-            <li><a href="https://docs.aiohttp.org/" target="_blank">Aiohttp — асинхронные HTTP-запросы</a></li>
             <li><a href="https://docs.aiogram.dev/" target="_blank">aiogram — асинхронный фреймворк для Telegram ботов</a></li>
+            <li><a href="https://api.nbrb.by" target="_blank">API Национального банка Беларуси (курсы валют)</a></li>
             <li><a href="https://open-meteo.com/" target="_blank">Open-Meteo — бесплатный API погоды</a></li>
-            <li><a href="https://exchangerate.host" target="_blank">ExchangeRate.host — бесплатный API курсов валют</a></li>
+            <li><a href="https://requests.readthedocs.io/" target="_blank">Библиотека Requests</a></li>
         </ul>
         <div class="note warning">
             ⚠️ Всегда храните API-ключи в файле <code>.env</code>, добавьте его в <code>.gitignore</code>. Никогда не публикуйте ключи в открытом доступе.
         </div>
         <div class="note">
-            🌡️ <strong>О параметре «температура»</strong>: в Groq API и большинстве современных LLM он называется именно <code>temperature</code>. Это коэффициент «креативности»: от 0 (сухие факты) до 1 (высокая фантазия). В заданиях просят менять его значение — экспериментируйте!
+            🌡️ <strong>О параметре «температура»</strong>: в Groq API и большинстве современных LLM он называется именно <code>temperature</code>. Это коэффициент «креативности»: от 0 (сухие факты) до 1 (высокая фантазия). Экспериментируйте!
         </div>
         <hr>
         <div style="text-align: center; margin: 1rem 0;">
