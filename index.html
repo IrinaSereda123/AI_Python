@@ -168,9 +168,9 @@
 <body>
 <div class="container">
     <header>
-        <h1>Практические работы по Python + Groq API</h1>
+        <h1>Проектирование ИИ-решений на Python</h1>
         <p>Интеграция языковых моделей в приложения на Python</p>
-        <div class="discipline-badge">Проектирование ИИ-решений на Python | День 8–10</div>
+        <div class="discipline-badge">Проектирование ИИ-решений на Python | День 8</div>
     </header>
     <nav>
         <a href="#work1">Работа №1</a>
@@ -180,7 +180,7 @@
         <a href="#resources">Ресурсы</a>
     </nav>
     <main>
-        <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python. Все задания выполняются в среде PyCharm или VS Code.</p>
+        <p style="margin-bottom: 1rem;">В этих работах вы научитесь подключаться к Groq API (бесплатный доступ к Llama 3.3), отправлять запросы, добавлять контекст и создавать полноценных AI-помощников на Python.</p>
         <div class="note">
             🔑 <strong>Подготовка:</strong> зарегистрируйтесь на <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create API Key. Скопируйте ключ (начинается с <code>gsk_</code>). Установите библиотеки: <code>pip install requests python-dotenv aiohttp aiogram</code>.
         </div>
@@ -189,7 +189,7 @@
         <h2 id="work1">📘 Практическая работа №1. Консольный AI-помощник</h2>
         <p><strong>Цель:</strong> научиться отправлять запросы к Groq API, использовать системные промпты и обрабатывать ответы.</p>
         
-        <h3>Базовый код (assistant.py) – не скрыт</h3>
+        <h3>Базовый код (assistant.py)</h3>
         <div class="code-block"><pre>import os
 import requests
 from dotenv import load_dotenv
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         answer = ask_groq(user_input, system)
         print(f"🤖 AI: {answer}")</pre></div>
 
-        <h3>✨ Дополнительные задания и их решения (скрыты)</h3>
+        <h3>✨ Дополнительные задания и их решения</h3>
         <details>
             <summary>📌 Задание 1.1: Добавить команду /history</summary>
             <div class="code-block"><pre># Добавляем глобальный список history
@@ -302,7 +302,7 @@ while True:
         <h2 id="work2">🌤️ Практическая работа №2. AI с реальными данными о погоде</h2>
         <p><strong>Цель:</strong> объединить вызов внешнего API погоды с Groq — AI будет отвечать на вопросы, используя реальные данные.</p>
 
-        <h3>🎯 Базовый вариант (только погода, без ИИ) – не скрыт</h3>
+        <h3>🎯 Базовый вариант (только погода, без ИИ)</h3>
         <div class="code-block"><pre>import requests
 
 while True:
@@ -324,7 +324,7 @@ while True:
     wind = weather_resp["current_weather"]["windspeed"]
     print(f"✅ {city}: {temp}°C, ветер {wind} км/ч")</pre></div>
 
-        <h3>🤖 Расширенный вариант: погода + советы от Groq (с .env) – не скрыт</h3>
+        <h3>🤖 Расширенный вариант: погода + советы от Groq (с .env)</h3>
         <div class="code-block"><pre>import os
 import requests
 from dotenv import load_dotenv
@@ -371,7 +371,7 @@ while True:
     advice = ask_groq(prompt)
     print(f"💡 Совет от ИИ: {advice}")</pre></div>
 
-        <h3>✨ Дополнительные решения (скрыты)</h3>
+        <h3>✨ Дополнительные решения</h3>
         <details>
             <summary>📌 Улучшенное распознавание городов (кириллица + латиница)</summary>
             <div class="code-block"><pre>city_map = {
@@ -403,7 +403,7 @@ else:
             <strong>⚡ Почему aiogram?</strong> Асинхронный фреймворк, высокая производительность, поддержка FSM и роутеров. Стандарт для современных ботов на Python.
         </div>
 
-        <h3>🎯 Базовое решение: эхо-бот (проверка токена) – не скрыт</h3>
+        <h3>🎯 Базовое решение: эхо-бот (проверка токена)</h3>
         <div class="code-block"><pre>import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -431,7 +431,7 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
 
-        <h3>🚀 Расширенное решение: AI-бот с Groq (без истории) – не скрыт</h3>
+        <h3>🚀 Расширенное решение: AI-бот с Groq (без истории)</h3>
         <div class="code-block"><pre>import os, aiohttp
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -475,7 +475,7 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
 
-        <h3>✨ Дополнительные решения (скрыты)</h3>
+        <h3>✨ Дополнительные решения</h3>
         <details>
             <summary>📌 Дополнительное решение 3.1: История диалога и команда /clear</summary>
             <div class="code-block"><pre>user_sessions = {}
@@ -676,7 +676,7 @@ if __name__ == "__main__":
                 <li><strong>Обработку даты в свободном формате</strong> (например, «курс доллара на вчера»).</li>
                 <li><strong>Логирование запросов</strong> в файл (с помощью модуля <code>logging</code>).</li>
             </ul>
-            <p>Реализуйте хотя бы одно улучшение и продемонстрируйте результат преподавателю.</p>
+            <p>Реализуйте хотя бы одно улучшение и продемонстрируйте результат.</p>
         </div>
 
         <!-- ====================== РЕСУРСЫ ====================== -->
@@ -684,19 +684,16 @@ if __name__ == "__main__":
         <ul>
             <li><a href="https://console.groq.com/docs/quickstart" target="_blank">Groq API Documentation</a></li>
             <li><a href="https://docs.aiogram.dev/" target="_blank">aiogram — асинхронный фреймворк для Telegram ботов</a></li>
-            <li><a href="https://api.nbrb.by" target="_blank">API Национального банка Беларуси (курсы валют)</a></li>
+            <li><a href="https://www.nbrb.by/apihelp/exrates" target="_blank">API Национального банка Беларуси (курсы валют)</a></li>
             <li><a href="https://open-meteo.com/" target="_blank">Open-Meteo — бесплатный API погоды</a></li>
             <li><a href="https://requests.readthedocs.io/" target="_blank">Библиотека Requests</a></li>
         </ul>
         <div class="note warning">
             ⚠️ Всегда храните API-ключи в файле <code>.env</code>, добавьте его в <code>.gitignore</code>. Никогда не публикуйте ключи в открытом доступе.
         </div>
-        <div class="note">
-            🌡️ <strong>О параметре «температура»</strong>: в Groq API и большинстве современных LLM он называется именно <code>temperature</code>. Это коэффициент «креативности»: от 0 (сухие факты) до 1 (высокая фантазия). Экспериментируйте!
-        </div>
         <hr>
         <div style="text-align: center; margin: 1rem 0;">
-            <p>✅ После выполнения всех работ и самостоятельных заданий вы сможете создавать AI-приложения любой сложности: от консольных чатов до Telegram-ботов с реальными данными и продвинутым UI.</p>
+            <p>✅ Удачи!</p>
         </div>
     </main>
     <footer>
