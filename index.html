@@ -82,11 +82,6 @@
             margin: 1.5rem 0 0.75rem 0;
             color: #1e466e;
         }
-        h4 {
-            font-size: 1.1rem;
-            margin: 1rem 0 0.5rem 0;
-            font-weight: 600;
-        }
         p, li {
             margin-bottom: 0.75rem;
         }
@@ -182,8 +177,9 @@
         <h2 id="work1">Практическая работа №1. Консольный AI-помощник</h2>
         <p><strong>Цель:</strong> научиться отправлять запросы к Groq API, использовать системные промпты и обрабатывать ответы.</p>
         
-        <h3>Базовый код (assistant.py)</h3>
-        <div class="code-block"><pre>import os
+        <details>
+            <summary>Базовый код (assistant.py)</summary>
+            <div class="code-block"><pre>import os
 import requests
 from dotenv import load_dotenv
 
@@ -208,19 +204,19 @@ def ask_groq(prompt, system_prompt=None):
     return response.json()["choices"][0]["message"]["content"]
 
 if __name__ == "__main__":
-    print("🤖 AI помощник (напиши 'выход' для завершения)")
+    print("AI помощник (напиши 'выход' для завершения)")
     system = "Ты дружелюбный эксперт по программированию на Python. Отвечай кратко и понятно."
     while True:
-        user_input = input("\n🧑‍💻 Вы: ")
+        user_input = input("\nВы: ")
         if user_input.lower() in ("выход", "exit"):
             break
         answer = ask_groq(user_input, system)
-        print(f"🤖 AI: {answer}")</pre></div>
+        print(f"AI: {answer}")</pre></div>
+        </details>
 
-        <h3>Дополнительные задания и их решения</h3>
         <details>
-            <summary>Задание 1.1: Добавить команду /history, которая показывает последние 5 сообщений</summary>
-            <div class="code-block"><pre># Модифицируем код: добавляем глобальный список history
+            <summary>Дополнительное задание 1.1: Команда /history</summary>
+            <div class="code-block"><pre># Добавляем глобальный список history
 history = []
 
 # В цикл вставляем после каждого ответа:
@@ -229,27 +225,26 @@ history.append({"role": "assistant", "content": answer})
 
 # Обработка команды /history
 if user_input == "/history":
-    print("📜 Последние 5 сообщений:")
-    for i, msg in enumerate(history[-10:]):  # последние 10 сообщений (5 пар)
+    print("Последние 5 сообщений:")
+    for msg in history[-10:]:
         print(f"{msg['role']}: {msg['content'][:100]}")
-    continue  # пропускаем обычный запрос к API</pre></div>
+    continue</pre></div>
         </details>
+
         <details>
-            <summary>Задание 1.2: Реализовать ограничение длины контекста и изменять температуру</summary>
+            <summary>Дополнительное задание 1.2: Контекст и температура</summary>
             <div class="code-block"><pre># Ограничиваем историю (храним только последние 10 сообщений)
 if len(history) > 10:
     history = history[-10:]
 
-# Перед отправкой запроса собираем сообщения: системный промпт + история
 messages_for_api = [{"role": "system", "content": system}] + history
-
-# Изменяем temperature (например, даём пользователю ввести значение)
 temp = float(input("Введите температуру (0.1 - 1.2): "))
 payload["temperature"] = temp</pre></div>
-            <div class="note">📝 <strong>Что такое температура?</strong> В Groq API параметр называется <code>temperature</code>. Чем ниже значение, тем более сухие и фактологичные ответы; чем выше — тем креативнее.</div>
+            <div class="note">Параметр <code>temperature</code> управляет креативностью ответов: от 0 (сухие факты) до 1 (высокая фантазия).</div>
         </details>
+
         <details>
-            <summary>Задание 1.3 (★): Полноценный скрипт с историей, очисткой и регулировкой температуры</summary>
+            <summary>Дополнительное задание 1.3 (★): Полноценный скрипт</summary>
             <div class="code-block"><pre>import os, requests
 from dotenv import load_dotenv
 load_dotenv()
@@ -267,7 +262,7 @@ def ask_groq(messages):
     resp.raise_for_status()
     return resp.json()["choices"][0]["message"]["content"]
 
-print("🤖 AI помощник. Команды: /history, /clear, /temp [число], /exit")
+print("AI помощник. Команды: /history, /clear, /temp [число], /exit")
 while True:
     user = input("\nВы: ")
     if user.lower() in ("/exit", "выход"):
@@ -290,7 +285,7 @@ while True:
     history.append({"role": "user", "content": user})
     messages = [{"role": "system", "content": SYSTEM}] + history[-10:]
     answer = ask_groq(messages)
-    print(f"🤖 AI: {answer}")
+    print(f"AI: {answer}")
     history.append({"role": "assistant", "content": answer})</pre></div>
         </details>
 
@@ -298,18 +293,19 @@ while True:
         <h2 id="work2">Практическая работа №2. AI с реальными данными о погоде</h2>
         <p><strong>Цель:</strong> объединить вызов внешнего API погоды с Groq — AI будет отвечать на вопросы, используя реальные данные.</p>
 
-        <h3>Базовый вариант (только погода, без ИИ)</h3>
-        <div class="code-block"><pre>import requests
+        <details>
+            <summary>Базовый вариант (только погода, без ИИ)</summary>
+            <div class="code-block"><pre>import requests
 
 while True:
-    city = input("\n🌍 Введите город (на английском, 'выход' для завершения): ").strip()
+    city = input("\nВведите город (на английском, 'выход' для завершения): ").strip()
     if city.lower() in ("выход", "exit"):
         break
 
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&format=json"
     geo_resp = requests.get(geo_url).json()
     if not geo_resp.get("results"):
-        print("❌ Город не найден. Попробуйте ещё раз.")
+        print("Город не найден. Попробуйте ещё раз.")
         continue
 
     lat = geo_resp["results"][0]["latitude"]
@@ -318,10 +314,12 @@ while True:
     weather_resp = requests.get(weather_url).json()
     temp = weather_resp["current_weather"]["temperature"]
     wind = weather_resp["current_weather"]["windspeed"]
-    print(f"✅ {city}: {temp}°C, ветер {wind} км/ч")</pre></div>
+    print(f"{city}: {temp}°C, ветер {wind} км/ч")</pre></div>
+        </details>
 
-        <h3>Расширенный вариант: погода + советы от Groq (с .env)</h3>
-        <div class="code-block"><pre>import os
+        <details>
+            <summary>Расширенный вариант: погода + советы от Groq (с .env)</summary>
+            <div class="code-block"><pre>import os
 import requests
 from dotenv import load_dotenv
 
@@ -353,23 +351,21 @@ def ask_groq(prompt):
     return resp.json()["choices"][0]["message"]["content"]
 
 while True:
-    city = input("\n🌍 Введите город на английском (или 'выход'): ").strip()
+    city = input("\nВведите город на английском (или 'выход'): ").strip()
     if city.lower() in ("выход", "exit"):
         break
     temp, wind = get_weather(city)
     if temp is None:
-        print("❌ Город не найден, попробуйте ещё раз.")
+        print("Город не найден, попробуйте ещё раз.")
         continue
-    print(f"\n🌡️ Погода в {city}: {temp}°C, ветер {wind} км/ч")
-    prompt = f"""Погода: температура {temp}°C, ветер {wind} км/ч.
-Дай краткий совет (2-3 предложения): как одеваться, нужен ли зонт/шапка, стоит ли выходить на улицу.
-Ответь дружелюбно, без лишних слов."""
+    print(f"Погода в {city}: {temp}°C, ветер {wind} км/ч")
+    prompt = f"Погода: температура {temp}°C, ветер {wind} км/ч. Дай краткий совет (2-3 предложения): как одеваться, нужен ли зонт/шапка, стоит ли выходить на улицу. Ответь дружелюбно, без лишних слов."
     advice = ask_groq(prompt)
-    print(f"💡 Совет от ИИ: {advice}")</pre></div>
+    print(f"Совет от ИИ: {advice}")</pre></div>
+        </details>
 
-        <h3>Дополнительные решения</h3>
         <details>
-            <summary>Улучшенное распознавание городов (кириллица + латиница)</summary>
+            <summary>Дополнительное решение: распознавание городов на русском</summary>
             <div class="code-block"><pre>city_map = {
     "минск": "Minsk", "москва": "Moscow", "киев": "Kyiv",
     "питер": "Saint Petersburg", "брест": "Brest", "гродно": "Grodno"
@@ -381,8 +377,9 @@ def extract_city(text):
             return en
     return text.split()[-1].strip(",.?!")</pre></div>
         </details>
+
         <details>
-            <summary>Логика «Надо ли брать зонт?» с вызовом погоды</summary>
+            <summary>Дополнительное решение: логика «Надо ли брать зонт?»</summary>
             <div class="code-block"><pre>if "зонт" in q.lower() or "погод" in q.lower():
     city = extract_city(q)
     weather = get_weather(city)
@@ -393,14 +390,15 @@ else:
 
         <!-- ====================== РАБОТА №3 ====================== -->
         <h2 id="work3">Практическая работа №3. Telegram-бот (aiogram) + Groq + курс валют НБРБ</h2>
-        <p><strong>Цель:</strong> создать асинхронного Telegram-бота на aiogram, интегрировать Groq API для умных ответов, добавить историю диалога и запрос курса валют через API Национального банка Республики Беларусь.</p>
+        <p><strong>Цель:</strong> создать асинхронного Telegram-бота на aiogram, интегрировать Groq API для умных ответов, добавить историю диалога и запрос курса валют через API Национального банка Республики Беларусь с поддержкой даты и разных валют.</p>
 
         <div class="note">
-            <strong>⚡ Почему aiogram?</strong> Асинхронный фреймворк, высокая производительность, поддержка FSM и роутеров. Стандарт для современных ботов на Python.
+            <strong>Почему aiogram?</strong> Асинхронный фреймворк, высокая производительность, поддержка FSM и роутеров. Стандарт для современных ботов на Python.
         </div>
 
-        <h3>Базовое решение: эхо-бот (проверка токена)</h3>
-        <div class="code-block"><pre>import os
+        <details>
+            <summary>Базовое решение: эхо-бот (проверка токена)</summary>
+            <div class="code-block"><pre>import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -426,9 +424,11 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
+        </details>
 
-        <h3>Расширенное решение: AI-бот с Groq (без истории)</h3>
-        <div class="code-block"><pre>import os, aiohttp
+        <details>
+            <summary>Расширенное решение: AI-бот с Groq (без истории)</summary>
+            <div class="code-block"><pre>import os, aiohttp
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -470,26 +470,21 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
+        </details>
 
-        <h3>Дополнительное решение 3.1: Добавить контекст (историю) и команду /clear</h3>
-        <div class="code-block"><pre># Добавляем словарь для хранения истории каждого пользователя
-user_sessions = {}
+        <details>
+            <summary>Дополнительное решение 3.1: История диалога и команда /clear</summary>
+            <div class="code-block"><pre>user_sessions = {}
 SYSTEM_PROMPT = "Ты дружелюбный помощник. Отвечай кратко."
 
 async def ask_groq_with_history(user_id, text):
     if user_id not in user_sessions:
         user_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
     user_sessions[user_id].append({"role": "user", "content": text})
-    # Ограничиваем длину (системный + последние 10 сообщений)
     if len(user_sessions[user_id]) > 12:
         user_sessions[user_id] = [user_sessions[user_id][0]] + user_sessions[user_id][-10:]
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": user_sessions[user_id],
-        "temperature": 0.8,
-        "max_tokens": 300
-    }
+    payload = {"model": "llama-3.3-70b-versatile", "messages": user_sessions[user_id], "temperature": 0.8}
     async with aiohttp.ClientSession() as session:
         async with session.post(GROQ_URL, json=payload, headers=headers) as resp:
             data = await resp.json()
@@ -500,43 +495,78 @@ async def ask_groq_with_history(user_id, text):
 @dp.message(Command("clear"))
 async def cmd_clear(message: types.Message):
     user_sessions[message.from_user.id] = []
-    await message.answer("История очищена.")
+    await message.answer("История очищена.")</pre></div>
+        </details>
 
+        <details>
+            <summary>Дополнительное решение 3.2: Курс валют НБРБ (с поддержкой даты и разных валют)</summary>
+            <div class="code-block"><pre>import re
+from datetime import datetime
+
+async def get_rate(currency_code, date_str=None):
+    # currency_code: буквенный код ISO 4217 (USD, EUR, RUB)
+    # Если дата не указана, используется сегодняшняя
+    if date_str is None:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+    # Используем parammode=2 (буквенный код) и параметр ondate
+    url = f"https://api.nbrb.by/exrates/rates/{currency_code}?parammode=2&ondate={date_str}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return None
+            data = await resp.json()
+            # API возвращает объект (не массив) при указании cur_id
+            return {
+                "rate": data["Cur_OfficialRate"],
+                "scale": data["Cur_Scale"],
+                "name": data["Cur_Name"],
+                "date": data["Date"]
+            }
+
+# В обработчике сообщений:
 @dp.message()
 async def handle_message(message: types.Message):
-    answer = await ask_groq_with_history(message.from_user.id, message.text)
-    await message.answer(answer)</pre></div>
-
-        <h3>Дополнительное решение 3.2: Курс валют через API НБРБ</h3>
-        <p>API Национального банка Беларуси: <code>https://api.nbrb.by/exrates/rates/{cur_id}?parammode=2</code> возвращает курс валюты к белорусскому рублю. Используем ID: USD = 431, EUR = 451.</p>
-        <div class="code-block"><pre>async def get_usd_rate():
-    url = "https://api.nbrb.by/exrates/rates/431?parammode=2"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            data = await resp.json()
-            return data["Cur_OfficialRate"]
-
-async def get_eur_rate():
-    url = "https://api.nbrb.by/exrates/rates/451?parammode=2"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            data = await resp.json()
-            return data["Cur_OfficialRate"]
-
-# В обработчике сообщений (внутри handle_message):
-if "курс" in text.lower():
-    if "доллар" in text.lower() or "usd" in text.lower():
-        rate = await get_usd_rate()
-        await message.answer(f"Курс USD к BYN: {rate} руб.")
-    elif "евро" in text.lower() or "eur" in text.lower():
-        rate = await get_eur_rate()
-        await message.answer(f"Курс EUR к BYN: {rate} руб.")
+    text = message.text.lower()
+    user_id = message.from_user.id
+    # Проверяем запрос курса валют
+    if "курс" in text:
+        # Определяем валюту
+        currency = None
+        if "доллар" in text or "usd" in text:
+            currency = "USD"
+        elif "евро" in text or "eur" in text:
+            currency = "EUR"
+        elif "рубль" in text or "rub" in text:
+            currency = "RUB"
+        else:
+            await message.answer("Напишите 'курс доллара', 'курс евро' или 'курс рубля'.\nМожно указать дату: 'курс доллара на 2024-05-13'")
+            return
+        # Извлекаем дату (формат YYYY-MM-DD)
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
+        date_str = date_match.group(1) if date_match else None
+        rate_data = await get_rate(currency, date_str)
+        if rate_data is None:
+            await message.answer(f"Не удалось получить курс {currency.upper()} на указанную дату. Проверьте правильность даты.")
+            return
+        scale = rate_data["scale"]
+        rate = rate_data["rate"]
+        name = rate_data["name"]
+        date_display = rate_data["date"][:10]
+        if scale == 1:
+            await message.answer(f"Курс {name} на {date_display}: {rate} руб.")
+        else:
+            await message.answer(f"Курс {scale} {name} на {date_display}: {rate} руб. (за {scale} единиц)")
+        return
     else:
-        await message.answer("Напишите 'курс доллара' или 'курс евро'")
-    return  # важный возврат, чтобы не идти дальше в Groq</pre></div>
+        # Обычный вопрос -> Groq с историей
+        answer = await ask_groq_with_history(user_id, message.text)
+        await message.answer(answer)</pre></div>
+        </details>
 
-        <p>Полный интеграционный пример (все функции вместе):</p>
-        <div class="code-block"><pre>import os, aiohttp
+        <details>
+            <summary>Полный интеграционный пример (всё вместе)</summary>
+            <div class="code-block"><pre>import os, aiohttp, re
+from datetime import datetime
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -567,16 +597,25 @@ async def ask_groq_with_history(user_id, text):
     user_sessions[user_id].append({"role": "assistant", "content": answer})
     return answer
 
-async def get_rate(cur_id):
-    url = f"https://api.nbrb.by/exrates/rates/{cur_id}?parammode=2"
+async def get_rate(currency_code, date_str=None):
+    if date_str is None:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+    url = f"https://api.nbrb.by/exrates/rates/{currency_code}?parammode=2&ondate={date_str}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
+            if resp.status != 200:
+                return None
             data = await resp.json()
-            return data["Cur_OfficialRate"]
+            return {
+                "rate": data["Cur_OfficialRate"],
+                "scale": data["Cur_Scale"],
+                "name": data["Cur_Name"],
+                "date": data["Date"]
+            }
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Бот с Groq и курсом валют НБРБ. /clear – очистить историю.")
+    await message.answer("Бот с Groq и курсом валют НБРБ.\n/clear – очистить историю.\nПримеры: 'курс доллара', 'курс евро на 2024-05-13'")
 
 @dp.message(Command("clear"))
 async def cmd_clear(message: types.Message):
@@ -588,14 +627,30 @@ async def handle_message(message: types.Message):
     text = message.text.lower()
     user_id = message.from_user.id
     if "курс" in text:
+        currency = None
         if "доллар" in text or "usd" in text:
-            rate = await get_rate(431)
-            await message.answer(f"Курс USD к BYN: {rate} руб.")
+            currency = "USD"
         elif "евро" in text or "eur" in text:
-            rate = await get_rate(451)
-            await message.answer(f"Курс EUR к BYN: {rate} руб.")
+            currency = "EUR"
+        elif "рубль" in text or "rub" in text:
+            currency = "RUB"
         else:
-            await message.answer("Напишите 'курс доллара' или 'курс евро'")
+            await message.answer("Напишите 'курс доллара', 'курс евро' или 'курс рубля'.\nМожно указать дату, например 'курс доллара на 2024-05-13'")
+            return
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
+        date_str = date_match.group(1) if date_match else None
+        rate_data = await get_rate(currency, date_str)
+        if rate_data is None:
+            await message.answer(f"Не удалось получить курс {currency.upper()} на указанную дату. Проверьте правильность даты.")
+            return
+        scale = rate_data["scale"]
+        rate = rate_data["rate"]
+        name = rate_data["name"]
+        date_display = rate_data["date"][:10]
+        if scale == 1:
+            await message.answer(f"Курс {name} на {date_display}: {rate} руб.")
+        else:
+            await message.answer(f"Курс {scale} {name} на {date_display}: {rate} руб. (за {scale} единиц)")
     else:
         answer = await ask_groq_with_history(user_id, message.text)
         await message.answer(answer)
@@ -606,6 +661,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
+        </details>
 
         <!-- ====================== РЕСУРСЫ ====================== -->
         <h2 id="resources">Полезные ресурсы</h2>
