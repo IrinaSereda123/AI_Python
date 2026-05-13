@@ -371,7 +371,7 @@ while True:
     advice = ask_groq(prompt)
     print(f"💡 Совет от ИИ: {advice}")</pre></div>
 
-        <h3>✨ Дополнительные решения</h3>
+        <h3>✨ Дополнительные решения (исправлены)</h3>
         <details>
             <summary>📌 Улучшенное распознавание городов (кириллица + латиница)</summary>
             <div class="code-block"><pre>city_map = {
@@ -386,13 +386,18 @@ def extract_city(text):
     return text.split()[-1].strip(",.?!")</pre></div>
         </details>
         <details>
-            <summary>📌 Логика «Надо ли брать зонт?» с вызовом погоды</summary>
-            <div class="code-block"><pre>if "зонт" in q.lower() or "погод" in q.lower():
-    city = extract_city(q)
-    weather = get_weather(city)
-    prompt = f"Погода в {city}: {weather}. Ответь на вопрос пользователя: '{q}'"
+            <summary>📌 Логика «Надо ли брать зонт?» с вызовом погоды (ИСПРАВЛЕНО)</summary>
+            <div class="code-block"><pre># Вставьте этот фрагмент в основной цикл вместо старой обработки погоды
+if "зонт" in user_input.lower() or "погод" in user_input.lower():
+    city = extract_city(user_input)
+    temp, wind = get_weather(city)
+    if temp is not None:
+        weather_str = f"{temp}°C, ветер {wind} км/ч"
+        prompt = f"Погода в {city}: {weather_str}. Ответь на вопрос пользователя: '{user_input}'"
+    else:
+        prompt = f"Не удалось получить погоду для {city}. Сообщи об этом пользователю."
 else:
-    prompt = q</pre></div>
+    prompt = user_input</pre></div>
         </details>
 
         <!-- ====================== РАБОТА №3 ====================== -->
@@ -500,58 +505,6 @@ async def ask_groq_with_history(user_id, text):
 async def cmd_clear(message: types.Message):
     user_sessions[message.from_user.id] = []
     await message.answer("История очищена.")</pre></div>
-        </details>
-
-        <details>
-            <summary>📌 Дополнительное решение 3.2: Курс валют НБРБ (с поддержкой даты и разных валют)</summary>
-            <div class="code-block"><pre>import re
-from datetime import datetime
-
-async def get_rate(currency_code, date_str=None):
-    # currency_code: буквенный код ISO 4217 (USD, EUR, RUB)
-    if date_str is None:
-        date_str = datetime.now().strftime("%Y-%m-%d")
-    url = f"https://api.nbrb.by/exrates/rates/{currency_code}?parammode=2&ondate={date_str}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status != 200:
-                return None
-            data = await resp.json()
-            return {
-                "rate": data["Cur_OfficialRate"],
-                "scale": data["Cur_Scale"],
-                "name": data["Cur_Name"],
-                "date": data["Date"]
-            }
-
-# В обработчике сообщений (внутри handle_message)
-# Проверяем запрос курса
-if "курс" in text:
-    currency = None
-    if "доллар" in text or "usd" in text:
-        currency = "USD"
-    elif "евро" in text or "eur" in text:
-        currency = "EUR"
-    elif "рубль" in text or "rub" in text:
-        currency = "RUB"
-    else:
-        await message.answer("Напишите 'курс доллара', 'курс евро' или 'курс рубля'. Можно указать дату: 'курс доллара на 2024-05-13'")
-        return
-    date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
-    date_str = date_match.group(1) if date_match else None
-    rate_data = await get_rate(currency, date_str)
-    if rate_data is None:
-        await message.answer(f"Не удалось получить курс {currency} на указанную дату. Проверьте правильность даты.")
-        return
-    scale = rate_data["scale"]
-    rate = rate_data["rate"]
-    name = rate_data["name"]
-    date_display = rate_data["date"][:10]
-    if scale == 1:
-        await message.answer(f"Курс {name} на {date_display}: {rate} руб.")
-    else:
-        await message.answer(f"Курс {scale} {name} на {date_display}: {rate} руб. (за {scale} единиц)")
-    return  # не идём в Groq</pre></div>
         </details>
 
         <details>
