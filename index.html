@@ -299,10 +299,10 @@ while True:
         </details>
 
         <!-- ====================== РАБОТА №2 ====================== -->
-        <h2 id="work2">🌤️ Практическая работа №2. AI с реальными данными о погоде</h2>
+        <h2 id="work2">📘 Практическая работа №2. AI с реальными данными о погоде</h2>
         <p><strong>Цель:</strong> объединить вызов внешнего API погоды с Groq — AI будет отвечать на вопросы, используя реальные данные.</p>
 
-        <h3>🎯 Базовый вариант (только погода, без ИИ)</h3>
+        <h3>Базовый вариант (только погода, без ИИ)</h3>
         <div class="code-block"><pre>import requests
 
 while True:
@@ -324,7 +324,7 @@ while True:
     wind = weather_resp["current_weather"]["windspeed"]
     print(f"✅ {city}: {temp}°C, ветер {wind} км/ч")</pre></div>
 
-        <h3>🤖 Расширенный вариант: погода + советы от Groq (с .env)</h3>
+        <h3>Расширенный вариант: погода + советы от Groq (с .env)</h3>
         <div class="code-block"><pre>import os
 import requests
 from dotenv import load_dotenv
@@ -396,14 +396,14 @@ else:
         </details>
 
         <!-- ====================== РАБОТА №3 ====================== -->
-        <h2 id="work3">🤖 Практическая работа №3. Telegram-бот (aiogram) + Groq + курс валют НБРБ</h2>
+        <h2 id="work3">📘 Практическая работа №3. Telegram-бот (aiogram) + Groq + курс валют НБРБ</h2>
         <p><strong>Цель:</strong> создать асинхронного Telegram-бота на aiogram, интегрировать Groq API для умных ответов, добавить историю диалога и запрос курса валют через API Национального банка Республики Беларусь с поддержкой даты и разных валют (USD, EUR, RUB).</p>
 
         <div class="note">
             <strong>⚡ Почему aiogram?</strong> Асинхронный фреймворк, высокая производительность, поддержка FSM и роутеров. Стандарт для современных ботов на Python.
         </div>
 
-        <h3>🎯 Базовое решение: эхо-бот (проверка токена)</h3>
+        <h3>Базовое решение: эхо-бот (проверка токена)</h3>
         <div class="code-block"><pre>import os
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -431,7 +431,7 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())</pre></div>
 
-        <h3>🚀 Расширенное решение: AI-бот с Groq (без истории)</h3>
+        <h3>Расширенное решение: AI-бот с Groq (без истории)</h3>
         <div class="code-block"><pre>import os, aiohttp
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
@@ -655,7 +655,7 @@ if __name__ == "__main__":
         </details>
 
         <!-- ====================== САМОСТОЯТЕЛЬНЫЕ ЗАДАНИЯ ====================== -->
-        <h2 id="tasks">🧩 Самостоятельные задания для развития</h2>
+        <h2 id="tasks">🧩 Самостоятельные задания</h2>
         <div class="task-block">
             <h3>📌 Задание 1. Сменить языковую модель на Llama 4 Scout</h3>
             <p>В Groq API появились новые модели семейства Llama 4. Изучите документацию Groq и замените модель в запросах с <code>llama-3.3-70b-versatile</code> на <code>llama-4-scout</code> (или другое актуальное название из списка). Сравните качество ответов, скорость работы и потребление токенов. Подсказка: параметр <code>model</code> в payload.</p>
