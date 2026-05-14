@@ -248,7 +248,7 @@ if len(history) > 10:
     history = history[-10:]
 
 messages_for_api = [{"role": "system", "content": system}] + history
-temp = float(input("Введите температуру (0.1 - 1.2): "))
+temp = float(input("Введите температуру (0.1 - 1.0): "))
 payload["temperature"] = temp</pre></div>
             <div class="note">📝 <strong>Что такое температура?</strong> Параметр <code>temperature</code> управляет креативностью ответов: от 0 (сухие факты) до 1 (высокая фантазия).</div>
         </details>
